@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #ff758c, #ff7eb3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 420px;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    #mood {
+        display: inline-block;
+        font-size: 3rem;
+        margin-left: 10px;
+        transition: transform 0.2s;
+    }
+
+    #whyText {
+        color: white;
+        font-size: 1.2rem;
+        display: none;
+        margin-bottom: 25px;
+    }
+
+    button {
+        padding: 15px 35px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 40px;
+        cursor: pointer;
+        min-width: 130px;
+        touch-action: manipulation;
+    }
+
+    #yesBtn {
+        background-color: #ff2e63;
+        color: white;
+        display: block;
+        margin: 0 auto;
+        z-index: 2;
+    }
+
+    #noBtn {
+        background-color: white;
+        color: #ff2e63;
+        position: absolute;
+    }
+
+    .celebration {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        padding: 20px;
+        z-index: 5;
+    }
+
+    .hearts {
+        font-size: 3rem;
+        animation: float 1.2s infinite alternate;
+    }
+
+    @keyframes float {
+        from { transform: translateY(0); }
+        to { transform: translateY(-20px); }
+    }
+
+    .tear {
+        position: fixed;
+        font-size: 1.2rem;
+        animation: fall 1s linear forwards;
+        pointer-events: none;
+    }
+
+    @keyframes fall {
+        from { transform: translateY(0); opacity: 1; }
+        to { transform: translateY(40px); opacity: 0; }
+    }
+
+    .hug {
+        animation: hug 0.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes hug {
+        from { transform: scale(1) translateX(0); }
+        to { transform: scale(1.1) translateX(8px); }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>
+        Will you be my Valentine?
+        <span id="mood">🙂</span>
+    </h1>
+
+    <p id="whyText">Why 😭</p>
+
+    <button id="yesBtn">Yes 💖</button>
+    <button id="noBtn">No 💔</button>
+</div>
+
+<div class="celebration" id="celebration">
+    <h2>YAAAY!!! 🥰💞</h2>
+    <div class="hearts">❤️ 💖 💘 💝 💕</div>
+    <p>I knew you’d say yes 😘</p>
+</div>
+
+<audio id="yesSound">
+    <source src="https://www.soundjay.com/human/sounds/applause-8.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const celebration = document.getElementById("celebration");
+    const sound = document.getElementById("yesSound");
+    const mood = document.getElementById("mood");
+    const whyText = document.getElementById("whyText");
+
+    const moods = ["🙂", "😐", "😟", "😢", "😭"];
+    let moodIndex = 0;
+
+    function createTear() {
+        const tear = document.createElement("span");
+        tear.className = "tear";
+        tear.textContent = "💧";
+
+        const rect = mood.getBoundingClientRect();
+        tear.style.left = rect.left + rect.width / 2 + "px";
+        tear.style.top = rect.bottom + "px";
+
+        document.body.appendChild(tear);
+        setTimeout(() => tear.remove(), 1000);
+    }
+
+    function makeSadder() {
+        if (moodIndex < moods.length - 1) {
+            moodIndex++;
+            mood.textContent = moods[moodIndex];
+        }
+
+        whyText.style.display = "block";
+
+        if (mood.textContent === "😢" || mood.textContent === "😭") {
+            createTear();
+        }
+    }
+
+    function moveNoButton() {
+        const btnWidth = noBtn.offsetWidth;
+        const btnHeight = noBtn.offsetHeight;
+        const padding = 10;
+
+        const x = Math.random() * (window.innerWidth - btnWidth - padding * 2) + padding;
+        const y = Math.random() * (window.innerHeight - btnHeight - padding * 2) + padding;
+
+        noBtn.style.left = `${x}px`;
+        noBtn.style.top = `${y}px`;
+        noBtn.style.transform = "none";
+
+        makeSadder();
+    }
+
+    document.addEventListener("mousemove", (e) => {
+        const rect = noBtn.getBoundingClientRect();
+        const distance = Math.hypot(
+            e.clientX - (rect.left + rect.width / 2),
+            e.clientY - (rect.top + rect.height / 2)
+        );
+
+        if (distance < 120) moveNoButton();
+    });
+
+    noBtn.addEventListener("touchstart", moveNoButton);
+    noBtn.addEventListener("click", moveNoButton);
+
+    yesBtn.addEventListener("click", () => {
+        celebration.style.display = "flex";
+        sound.play();
+        mood.textContent = "😍";
+        whyText.style.display = "none";
+        mood.classList.add("hug");
+    });
+</script>
+
+</body>
+</html>
